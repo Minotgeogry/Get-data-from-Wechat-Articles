@@ -1,0 +1,39 @@
+import requests
+import time
+lines=[ ]
+url='https://mp.weixin.qq.com/cgi-bin/appmsg'  # 目标url
+headers = {
+    'Cookie':' ',
+    'User-Agent':' '
+}  # 使用Cookie，自动登录
+token=''  # 网页的token会时常变化，因此建议直接用代码抓取
+fakeid='' # 公众号的标识ID，不变
+data = {
+        'token': token,
+        'lang':'zh_CN',
+        'f': 'json',
+        'ajax':'1',
+        'random':' ',
+        'action':'list_ex',
+        'begin':' ',
+        'count':'5',
+        'query':' ',  # 公众号ID
+        'fakeid': fakeid,
+        'type':'9'
+}  # 自行筛选参数
+appmsg_response=requests.get(url=url, headers=headers,params=data)
+max_num=appmsg_response.json().get("app_msg_cnt")
+num=int(int(max_num)/5)  # 若被提示None Type，则可能频次太快，被封了
+begin=0
+while num + 1 > 0:
+    data_response = requests.get(url, headers=headers, params=data)
+    line = data_response.json().get('app_msg_list')  # 可以筛选目标字段，否则会提取标题及图片，文章链接等所有字段
+    num -= 1
+    begin += 5
+    time.sleep(20)  # 注意间隔，若太快，可能会被封
+# for item in line:
+# print(item.get('link')) #可以打印结果，查看数据状况
+with open('', 'w+') as f:  # 视数据类型，保存为csv/txt/html等格式
+    for line in lines:
+        f.write(line)
+        f.write('\n')
